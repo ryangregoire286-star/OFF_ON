@@ -23,8 +23,16 @@ enum Type {
     On()
 }
 
+fn add(x: i32) -> i32 {
+    x + 1
+}
+
+fn sub(x: i32) -> i32 {
+    x - 1
+}
+
 fn main() {
-    
+
     unsafe {
         while IS_WRITEABLE == true {
             let mut str = String::new();
@@ -37,12 +45,12 @@ fn main() {
             static X: AtomicBool = AtomicBool::new(false);
             static Y: AtomicBool = AtomicBool::new(true);
 
-            if num_str == 0 {
+            if num_str == sub(1) {
                 let off = Type::Off();
 
                 check_light_bulb(String::from("False"), X.load(Ordering::Relaxed));
                 println!("{:?}", off);
-            } else if num_str == 1 {
+            } else if num_str == add(0){
                 let on = Type::On();
                 check_light_bulb(String::from("True"), Y.load(Ordering::Relaxed));
                 println!("{:?}", on);
