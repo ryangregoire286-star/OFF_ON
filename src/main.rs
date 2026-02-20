@@ -1,4 +1,7 @@
 use std::io::stdin;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+pub static mut IS_WRITEABLE: bool = true;
 
 fn check_light_bulb(light_level: String, is_working: bool) -> () {
 
@@ -9,6 +12,8 @@ fn check_light_bulb(light_level: String, is_working: bool) -> () {
     else {
         println!("{}", String::from(light_level))
     }
+
+
 }
 
 #[derive(Debug)]
@@ -19,22 +24,32 @@ enum Type {
 }
 
 fn main() {
-    let mut str = String::new();
+    
+    unsafe {
+        while IS_WRITEABLE == true {
+            let mut str = String::new();
 
-    println!("{}", "Enter 1 || 0: ");
-    stdin().read_line(&mut str).expect("No Entered Input");
+            println!("{}", "Enter 1 || 0: ");
+            stdin().read_line(&mut str).expect("No Entered Input");
 
-    let num_str: i32 = str.trim().parse().unwrap();
+            let num_str: i32 = str.trim().parse().unwrap();
 
+            static X: AtomicBool = AtomicBool::new(false);
+            static Y: AtomicBool = AtomicBool::new(true);
 
-    if num_str == 0 {
-        let off = Type::Off();
-        check_light_bulb(String::from("False"), false);
-        println!("{:?}", off);
-    } else if num_str == 1 {
-        let on = Type::On();
-        check_light_bulb(String::from("True"), true);
-        println!("{:?}", on);
+            if num_str == 0 {
+                let off = Type::Off();
+
+                check_light_bulb(String::from("False"), X.load(Ordering::Relaxed));
+                println!("{:?}", off);
+            } else if num_str == 1 {
+                let on = Type::On();
+                check_light_bulb(String::from("True"), Y.load(Ordering::Relaxed));
+                println!("{:?}", on);
+            }
+
+            IS_WRITEABLE = false;
+        }
     }
 
 }
